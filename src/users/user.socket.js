@@ -18,6 +18,8 @@ const UserSocket = async (io) => {
                 data.password = bcript.hashSync(data.password, 10);
             }
             const result = await user.create(data);
+            //creating accounts for the User
+            
             io.emit("create_user", {
                 status: 200,
                 message: "success",
@@ -35,6 +37,49 @@ const UserSocket = async (io) => {
         }
     });
 
+
+    io.on("update_user", async (data) => {
+        console.log("socket for updating");
+        if (!data._id) {
+            io.emit("update_user_error", {
+                message: "id required",
+                error: null,
+                data: null
+            });
+        }
+
+        try {
+
+            if (data.password) {
+                data.password = bcript.hashSync(data.password, 10);
+            }
+
+            let result = await user.findByIdAndUpdate(data._id,data.data);
+            //updating User
+            if (!result) {
+                res.status(404).send({ 
+                    message: "not found", 
+                    error: null, 
+                    data:null
+                }); 
+            }
+            console.log("user updated");
+            io.emit("update_user", {
+                status: 200,
+                message: "success",
+                error: null,
+                data: await user.findById(data._id) 
+            });
+        } catch (error) {
+            console.log(error);
+            io.emit("create_user", {
+                status: 500,
+                message: "error occured",
+                error: error,
+                data: null
+            });
+        }
+    });
 
     io.on("get_all_users", async () => {
         try {

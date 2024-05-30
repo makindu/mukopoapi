@@ -6,11 +6,11 @@ const app = express();
 const http = require("http");
 
 const server = http.createServer(app);
-const IO = require("socket.io")(server, { cors: { origin: "http://172.20.10.6:8000" } });
+const IO = require("socket.io")(server,{cors:{origin:"*"}});
 const UserSocket = require("./src/users/user.socket");
 
 app.use(express.urlencoded({ extended: true }));
-app.use(cors);
+app.use(cors());
 app.use(express.json());
 app.use("/api", require("./index.route"));
 
