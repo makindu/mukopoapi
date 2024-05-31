@@ -37,9 +37,9 @@ const UserSocket = async (io) => {
                     },
                 );
                 result = {
-                    accounts: accounts, ...result,
-
-                }
+                    ...result.toObject(),
+                    accounts: accounts
+                };
                 io.emit("create_user", {
                     status: 200,
                     message: "success",
@@ -70,23 +70,26 @@ const UserSocket = async (io) => {
                 io.emit("delete_user", {
                     message: "id required",
                     error: null,
-                    data: [],
-                });
-                let result = await user.findByIdAndDelete(data._id);
-                if (!result) {
-                    res.status(404).send({
-                        message: "not found",
-                        error: null,
-                        data: null
-                    });
-                }
-                io.emit("delete_user", {
-                    status: 200,
-                    message: "success",
                     data: null,
-                    error: null,
-                })
+                });
+                return;
             }
+            let result = await user.findByIdAndDelete(data._id);
+            if (!result) {
+                res.status(404).send({
+                    message: "not found",
+                    error: null,
+                    data: null
+                });
+                return;
+            }
+            io.emit("delete_user", {
+                status: 200,
+                message: "success",
+                data: null,
+                error: null,
+            })
+
         } catch (error) {
             io.emit("delete_use", {
                 status: 500,
@@ -156,10 +159,10 @@ const UserSocket = async (io) => {
         } catch (error) {
 
             io.emit("get_all_users_error", {
-                status: 200,
-                message: "success",
+                status: 500,
+                message: "error",
                 error: error,
-                data: []
+                data: null
             });
         }
 
