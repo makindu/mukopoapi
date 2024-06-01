@@ -1,12 +1,19 @@
-const { user, account } = require("../../db.provider");
+const { user, account, notebook } = require("../../db.provider");
 const bcript = require("bcrypt");
 const UserController = {};
 
 
 UserController.AttachAccount = async (userId) => {
-  // Logic to fetch accounts for a user by userId
-  // This is a placeholder, replace it with your actual logic
-  return await account.find({ member_id: userId });
+    const accounts = await account.find({ member_id: userId });
+    const accountswithnotbooks = await Promise.all(accounts.map(async (element) => {
+      const account = await UserController.AccountNotebooks(element._id);
+      return {
+        ...element.toObject(),
+        notebooks: account
+      };
+    }));
+
+  return accountswithnotbooks;
 };
 
 UserController.getAll = async (req, res) => {
@@ -34,35 +41,7 @@ UserController.getAll = async (req, res) => {
     });
   }
 };
-// UserController.getAll = async (req, res) => {
-//   try {
-//     const users = await user.find({});
-//     const documents = await users.toArray();
-//     documents.forEach(elements => {
-//       // const accounts = await this.AttachAcount(element._id);
-//       console.log(elements);
-//       // element = {
-//       //   ...element.toObject(),
-//       //   accounts: []
-//       // };
 
-//     });
-
-//     return res.status(200).send({
-//       message: "success",
-//       error: null,
-//       data: documents
-//     });
-//   } catch (error) {
-//     return res
-//       .status(500)
-//       .send({
-//         message: "error occured",
-//         error: error,
-//         data: []
-//       });
-//   }
-// }
 
 UserController.create = async (req, res) => {
   if (!req.body.fullname || !req.body.phone) {
@@ -192,16 +171,7 @@ UserController.login = async (res, req) => {
   }
 };
 
-UserController.AttachAcount = async (member_id) => {
-  if (!member_id) {
-    return;
-  }
-  const accounts = await account.find({
-    $where: function () {
-      return this.member_id == member_id
-    }
-  });
-
-  return accounts;
+UserController.AccountNotebooks = async (account_id) => {
+  return await notebook.find({account_id:account_id});
 }
 module.exports = UserController;

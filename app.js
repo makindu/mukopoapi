@@ -8,7 +8,8 @@ const http = require("http");
 const server = http.createServer(app);
 const IO = require("socket.io")(server, { cors: { origin: "*" } });
 const UserSocket = require("./src/users/user.socket");
-const NoteBookWebSocket = require("./src/akiba/notebooks/notebook.socket")
+const NoteBookWebSocket = require("./src/akiba/notebooks/notebook.socket");
+const AccountsSocket = require("./src/akiba/accounts/account.socket");
 
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
@@ -20,6 +21,7 @@ IO.on("connection", (socket) => {
     console.log("new user conntected");
     UserSocket(socket);
     NoteBookWebSocket(socket);
+    AccountsSocket(socket);
 });
 
 

@@ -33,6 +33,14 @@ const notebookSchema = new schema({
     amount: {
         type: Number,
         required: true
+    },
+    maxoperations:{
+        type:Number,
+        default:27
+    },
+    note_status:{
+        type:String,
+        default:"pending"
     }
 });
 
