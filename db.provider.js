@@ -9,4 +9,5 @@ database.agencymember = require("./src/akiba/agencemembers/agencemember.model");
 database.accountnature = require("./src/akiba/naturesaccount/natureaccount.model");
 database.typeaccount = require("./src/akiba/typesaccount/typeaccount.model");
 database.notebook = require("./src/akiba/notebooks/notebook.model");
+database.notebookoperation = require("./src/akiba/history/history.model");
 module.exports = database;

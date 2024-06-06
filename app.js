@@ -10,6 +10,7 @@ const IO = require("socket.io")(server, { cors: { origin: "*" } });
 const UserSocket = require("./src/users/user.socket");
 const NoteBookWebSocket = require("./src/akiba/notebooks/notebook.socket");
 const AccountsSocket = require("./src/akiba/accounts/account.socket");
+const NotebookOperationSocket = require("./src/akiba/history/history.socket");
 
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
@@ -22,6 +23,7 @@ IO.on("connection", (socket) => {
     UserSocket(socket);
     NoteBookWebSocket(socket);
     AccountsSocket(socket);
+    NotebookOperationSocket(socket);
 });
 
 

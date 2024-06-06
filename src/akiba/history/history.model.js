@@ -1,32 +1,32 @@
+const { UUID } = require("mongodb");
 const mongoose = require("mongoose");
 const schema = require("mongoose").Schema;
 
-const historySchema = new schema({
-    member_id: {
+const notebookOperationSchema = new schema({
+    uuid:{
+        type:String,
+        default:UUID.generate(),
+        required:false
+    },
+    member_id: 
+        {
+        type: Map,
+        required: true
+        }
+    ,
+    notebook: {
         type: String,
         required: true
     },
-    nature_id: {
-        type: String,
-        required: true
-    },
-    account_id: {
+    collecter: {
         type: String,
         required: true,
     },
-    type_id: {
+    account: {
         type: String,
         required: true,
     },
-    created_by: {
-        type: String,
-        required: true
-    },
-    bringby: {
-        type: String,
-        required: true
-    },
-    money_id: {
+    done_by: {
         type: String,
         required: true
     },
@@ -34,14 +34,22 @@ const historySchema = new schema({
         type: Number,
         required: true
     },
-    maxoperations:{
-        type:Number,
-        default:27
-    },
-    note_status:{
+    money_id:{
         type:String,
-        default:"pending"
+        required:true
+    },
+    observation:{
+        type:String,
+        required:false
+    },
+    type_operation:{
+        type:String,
+        required:true
+    },
+    done_at:{
+        type:Date,
+        required:true
     }
 });
 
-module.exports = mongoose.model("histories", historySchema);
+module.exports = mongoose.model("notebooks_operations", notebookOperationSchema);
