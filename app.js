@@ -13,7 +13,6 @@ const AccountsSocket = require("./src/akiba/accounts/account.socket");
 const NotebookOperationSocket = require("./src/akiba/history/history.socket");
 const companyaccountSocket = require("./src/akiba/companyaccounts/company.socket");
 
-
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(express.json());

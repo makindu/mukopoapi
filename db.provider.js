@@ -10,4 +10,5 @@ database.accountnature = require("./src/akiba/naturesaccount/natureaccount.model
 database.typeaccount = require("./src/akiba/typesaccount/typeaccount.model");
 database.notebook = require("./src/akiba/notebooks/notebook.model");
 database.notebookoperation = require("./src/akiba/history/history.model");
+database.akibahistory = require("./src/akiba/akibahistory/akibahistory.model");
 module.exports = database;

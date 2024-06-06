@@ -18,13 +18,6 @@ const companyaccountSchema = new schema({
         type: String,
         required: true
     },
-    in_transaction: {
-        type: Map,
-        of: {
-            type: String
-        },
-        required: true,
-    },
     sold: {
         type: Number,
         default: 0,
