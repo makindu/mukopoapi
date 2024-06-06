@@ -9,4 +9,5 @@ router.use("/moneys", require("./src/akiba/moneys/money.route"));
 router.use("/accountnatures", require("./src/akiba/naturesaccount/natureaccount.route"));
 router.use("/accountstypes", require("./src/akiba/typesaccount/typeaccount.route"));
 router.use("/notebook", require("./src/akiba/notebooks/notebook.route"));
+router.use("/companyaccounts", require("./src/akiba/companyaccounts/company.route"));
 module.exports = router;

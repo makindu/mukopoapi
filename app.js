@@ -11,6 +11,8 @@ const UserSocket = require("./src/users/user.socket");
 const NoteBookWebSocket = require("./src/akiba/notebooks/notebook.socket");
 const AccountsSocket = require("./src/akiba/accounts/account.socket");
 const NotebookOperationSocket = require("./src/akiba/history/history.socket");
+const companyaccountSocket = require("./src/akiba/companyaccounts/company.socket");
+
 
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
@@ -24,6 +26,7 @@ IO.on("connection", (socket) => {
     NoteBookWebSocket(socket);
     AccountsSocket(socket);
     NotebookOperationSocket(socket);
+    companyaccountSocket(socket);
 });
 
 
