@@ -1,3 +1,5 @@
+const bcrypt = require('bcrypt');
+const nodemailer = require('nodemailer');
 const { user, account } = require("../../db.provider");
 const bcript = require("bcrypt");
 const generatePrefixedUUID = require("../../src/helper/uuid");
@@ -14,12 +16,50 @@ const UserSocket = async (io) => {
         }
 
         try {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
             if (data.password) {
                 data.password = bcript.hashSync(data.password, 10);
             }
             data.uuid = generatePrefixedUUID('M');
             let result = await user.create(data);
+            if (result.email != null || result.email != '' && emailRegex.test(result.email)) {
+                const transporter = nodemailer.createTransport({
+                    host: 'smtp.gmail.com', // Votre serveur SMTP
+                    port: 587, // Port SMTP
+                    secure: false, // true pour le port 465, false pour les autres ports
+                    auth: {
+                        user: 'wekaakibac@gmail.com', // Votre adresse e-mail
+                        pass: 'wekaakiba2024' // Votre mot de passe
+                    },
+                    tls: {
+                        rejectUnauthorized: true,
+                        minVersion: "TLSv1.2"
+                    }
+                });
+
+                // Définir les options de l'e-mail
+                const mailOptions = {
+                    from: 'wekaakibac@gmail.com', // Adresse de l'expéditeur
+                    to: result.email.trim(), // Adresse du destinataire
+                    subject: 'Creation compte Akiba', // Sujet de l'e-mail
+                    text: 'This is a test email sent from Nodemailer', // Contenu textuel de l'e-mail
+                    html: '<p>This is a test email sent from <b>Nodemailer</b></p>' // Contenu HTML de l'e-mail
+                };
+
+                try {
+                    // Envoyer l'e-mail
+                    await transporter.sendMail(mailOptions, (error, info) => {
+                        if (error) {
+                            return console.log(error);
+                        }
+                        console.log('E-mail sent: ' + info.response);
+                    });
+                } catch (error) {
+                    console.log(error);
+                }
+
+            }
             if (result) {
 
                 //creating accounts for the User
