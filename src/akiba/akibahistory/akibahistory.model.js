@@ -5,7 +5,7 @@ const schema = require("mongoose").Schema;
 const akibaHistorySchema = new schema({
     uuid:{
         type:String,
-        default:UUID.generate(),
+        default:UUID,
         required:false
     },
     member: 
