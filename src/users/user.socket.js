@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');
 const { user, account } = require("../../db.provider");
 const bcript = require("bcrypt");
 const generatePrefixedUUID = require("../../src/helper/uuid");
@@ -14,12 +15,16 @@ const UserSocket = async (io) => {
         }
 
         try {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
             if (data.password) {
                 data.password = bcript.hashSync(data.password, 10);
             }
             data.uuid = generatePrefixedUUID('M');
             let result = await user.create(data);
+            if (result.email != null || result.email != '' && emailRegex.test(result.email)) {
+
+            }
             if (result) {
 
                 //creating accounts for the User
