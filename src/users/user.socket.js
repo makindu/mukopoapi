@@ -1,5 +1,6 @@
 const { user, account } = require("../../db.provider");
 const bcript = require("bcrypt");
+const generatePrefixedUUID = require("../../src/helper/uuid");
 
 const UserSocket = async (io) => {
     io.on("create_user", async (data) => {
@@ -17,20 +18,21 @@ const UserSocket = async (io) => {
             if (data.password) {
                 data.password = bcript.hashSync(data.password, 10);
             }
+            data.uuid = generatePrefixedUUID('M');
             let result = await user.create(data);
             if (result) {
 
                 //creating accounts for the User
                 const accounts = await account.create(
                     {
-                        code: "XCDF-D" + result._id,
+                        code: "GOM-CDF" + result._id,
                         member_id: result._id,
                         money_id: "CDF",
                         sold: 0
 
                     },
                     {
-                        code: "XUSD-D" + result._id,
+                        code: "GOM-USD" + result._id,
                         member_id: result._id,
                         money_id: "USD",
                         sold: 0
