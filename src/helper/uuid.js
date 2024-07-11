@@ -4,4 +4,4 @@ function generatePrefixedUUID(prefix) {
     console.log(date);
     return `${prefix}-${date.getFullYear() + date.getMonth() + date.getDay() + date.getSeconds() + date.getMilliseconds()}`;
 }
-// module.exports = generatePrefixedUUID;
+module.exports = generatePrefixedUUID;

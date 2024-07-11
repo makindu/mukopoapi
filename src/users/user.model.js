@@ -45,6 +45,14 @@ const userSchema = new schema({
         type: String,
         required: false
     },
+    sensibilisator: {
+        type: Map,
+        required: false
+    },
+    sex: {
+        type: String,
+        required: false
+    },
 });
 
 
