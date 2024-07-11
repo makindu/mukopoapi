@@ -1,26 +1,26 @@
-const { UUID } = require("mongodb").UUID;
 const mongoose = require("mongoose");
+const generatePrefixedUUID = require("../../helper/uuid");
 const schema = require("mongoose").Schema;
 
 const akibaHistorySchema = new schema({
-    uuid:{
-        type:String,
-        default:UUID,
-        required:false
+    uuid: {
+        type: String,
+        default: generatePrefixedUUID('RAS'),
+        required: false
     },
-    member: 
+    member:
     {
         type: Map,
         required: true
     }
     ,
-    nature:{
-        type:String,
-        require:true
+    nature: {
+        type: String,
+        require: true
     },
-    type_operation:{
-        type:String,
-        required:true
+    type_operation: {
+        type: String,
+        required: true
     },
     notebook: {
         type: Map,
@@ -38,21 +38,21 @@ const akibaHistorySchema = new schema({
         type: Number,
         required: true
     },
-    money_id:{
-        type:String,
-        required:true
+    money_id: {
+        type: String,
+        required: true
     },
-    observation:{
-        type:String,
-        required:false
+    observation: {
+        type: String,
+        required: false
     },
-    done_at:{
-        type:Date,
-        required:true
+    done_at: {
+        type: Date,
+        required: true
     },
-    isvalidated:{
-        type:Boolean,
-        default:false
+    isvalidated: {
+        type: Boolean,
+        default: false
     }
 });
 

@@ -2,9 +2,15 @@ const mongoose = require("mongoose");
 const schema = require("mongoose").Schema;
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
+const generatePrefixedUUID = require("../../src/helper/uuid");
 // const validator = require('validator');
 
 const userSchema = new schema({
+    uuid: {
+        type: String,
+        // default: generatePrefixedUUID('M'),
+        unique: true
+    },
     fullname: {
         type: String,
         required: [true, "please provide a full name"],
@@ -31,8 +37,8 @@ const userSchema = new schema({
     },
     password: {
         type: String,
-        required: true,
-        unique: true,
+        // required: true,
+        // unique: true,
         default: bcrypt.hashSync("likelemba1234", 5)
     },
     manager_id: {
