@@ -21,6 +21,10 @@ const userSchema = new schema({
         required: [true, "please provide a full name"],
         unique: true
     },
+    adress: {
+        type: String,
+        required: false
+    },
     description: {
         type: String,
         required: false

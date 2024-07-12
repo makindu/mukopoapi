@@ -4,14 +4,14 @@ const UserController = {};
 
 
 UserController.AttachAccount = async (userId) => {
-    const accounts = await account.find({ member_id: userId });
-    const accountswithnotbooks = await Promise.all(accounts.map(async (element) => {
-      const account = await UserController.AccountNotebooks(element._id);
-      return {
-        ...element.toObject(),
-        notebooks: account
-      };
-    }));
+  const accounts = await account.find({ member_id: userId });
+  const accountswithnotbooks = await Promise.all(accounts.map(async (element) => {
+    const account = await UserController.AccountNotebooks(element._id);
+    return {
+      ...element.toObject(),
+      notebooks: account
+    };
+  }));
 
   return accountswithnotbooks;
 };
@@ -65,6 +65,73 @@ UserController.create = async (req, res) => {
       error: null,
       data: result
     });
+  } catch (error) {
+    return res
+      .status(500)
+      .send({
+        message: "error occured",
+        error: error,
+        data: null
+      });
+  }
+}
+UserController.mailSender = async (req, res) => {
+  if (!req.body.mail) {
+    res
+      .status(400)
+      .send({
+        message: "fullname or phone required",
+        error: null,
+        data: null
+      });
+  }
+
+  try {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+
+    if (req.body.email != null || req.body.email != '' && emailRegex.test(req.body.email)) {
+      const transporter = nodemailer.createTransport({
+        host: 'smtp.gmail.com', // Votre serveur SMTP
+        port: 587, // Port SMTP
+        secure: false, // true pour le port 465, false pour les autres ports
+        auth: {
+          user: 'wekaakibac@gmail.com', // Votre adresse e-mail
+          pass: 'svpi sjzp rjsz pvtm' // Votre mot de passe
+        },
+        tls: {
+          rejectUnauthorized: true,
+          minVersion: "TLSv1.2"
+        }
+      });
+
+      // Définir les options de l'e-mail
+      const mailOptions = {
+        from: 'wekaakibac@gmail.com', // Adresse de l'expéditeur
+        to: req.body.email, // Adresse du destinataire
+        subject: 'Creation compte Akiba', // Sujet de l'e-mail
+        text: 'This is a test email sent from Nodemailer', // Contenu textuel de l'e-mail
+        html: '<p>This is a test email sent from <b>Nodemailer</b></p>' // Contenu HTML de l'e-mail
+      };
+
+      try {
+        // Envoyer l'e-mail
+        var result = await transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+            return console.log(error);
+          }
+          console.log('E-mail sent: ' + info.response);
+        });
+      } catch (error) {
+        console.log(error);
+      }
+
+      return res.status(200).send({
+        message: "successsssssssssss",
+        error: 'data',
+        data: 'res'
+      });
+    }
   } catch (error) {
     return res
       .status(500)
@@ -172,6 +239,6 @@ UserController.login = async (res, req) => {
 };
 
 UserController.AccountNotebooks = async (account_id) => {
-  return await notebook.find({account_id:account_id});
+  return await notebook.find({ account_id: account_id });
 }
 module.exports = UserController;

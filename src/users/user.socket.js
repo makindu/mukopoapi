@@ -1,9 +1,9 @@
 const bcrypt = require('bcrypt');
-const nodemailer = require('nodemailer');
 const { user, account } = require("../../db.provider");
 const bcript = require("bcrypt");
+const path = require('path');
 const generatePrefixedUUID = require("../../src/helper/uuid");
-
+const { emailing, findHtmlFile } = require("../helper/mail_sender");
 const UserSocket = async (io) => {
     io.on("create_user", async (data) => {
 
@@ -17,48 +17,36 @@ const UserSocket = async (io) => {
 
         try {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
+            var passowrd = data.password;
             if (data.password) {
                 data.password = bcript.hashSync(data.password, 10);
             }
             data.uuid = generatePrefixedUUID('M');
             let result = await user.create(data);
-            if (result.email != null || result.email != '' && emailRegex.test(result.email)) {
-                const transporter = nodemailer.createTransport({
-                    host: 'smtp.gmail.com', // Votre serveur SMTP
-                    port: 587, // Port SMTP
-                    secure: false, // true pour le port 465, false pour les autres ports
-                    auth: {
-                        user: 'wekaakibac@gmail.com', // Votre adresse e-mail
-                        pass: 'wekaakiba2024' // Votre mot de passe
-                    },
-                    tls: {
-                        rejectUnauthorized: true,
-                        minVersion: "TLSv1.2"
-                    }
-                });
-
-                // Définir les options de l'e-mail
-                const mailOptions = {
-                    from: 'wekaakibac@gmail.com', // Adresse de l'expéditeur
-                    to: result.email.trim(), // Adresse du destinataire
-                    subject: 'Creation compte Akiba', // Sujet de l'e-mail
-                    text: 'This is a test email sent from Nodemailer', // Contenu textuel de l'e-mail
-                    html: '<p>This is a test email sent from <b>Nodemailer</b></p>' // Contenu HTML de l'e-mail
-                };
-
+            if (typeof result.email !== null && emailRegex.test(result.email)) {
                 try {
-                    // Envoyer l'e-mail
-                    await transporter.sendMail(mailOptions, (error, info) => {
-                        if (error) {
-                            return console.log(error);
+                    // Chemin de départ pour la recherche
+                    const baseDirectory = path.join(__dirname, '../helper/mailHtml');
+                    const fileName = 'welcome.html';
+
+                    // Chercher et envoyer l'email
+                    findHtmlFile(baseDirectory, fileName, async (err, filePath) => {
+                        if (err) {
+                            console.error('Erreur lors de la recherche du fichier HTML :', err);
+                        } else if (filePath) {
+                            const replacements = {
+                                username: result.fullname,
+                                password: passowrd,
+                            };
+                            await emailing(result.email, "BIENVENUE SUR WEKA AKIBA", filePath, replacements, '');
+                        } else {
+                            console.log('Fichier HTML non trouvé');
                         }
-                        console.log('E-mail sent: ' + info.response);
                     });
+
                 } catch (error) {
                     console.log(error);
                 }
-
             }
             if (result) {
 
