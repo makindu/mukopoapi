@@ -21,6 +21,10 @@ const userSchema = new schema({
         required: [true, "please provide a full name"],
         unique: true
     },
+    adress: {
+        type: String,
+        required: false
+    },
     description: {
         type: String,
         required: false
@@ -41,8 +45,8 @@ const userSchema = new schema({
         // unique: true,
         default: bcrypt.hashSync("likelemba1234", 5)
     },
-    manager_id: {
-        type: String,
+    manager: {
+        type: Map,
         required: false
     },
     sensibilisator: {
