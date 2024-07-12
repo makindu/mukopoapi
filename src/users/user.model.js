@@ -41,8 +41,8 @@ const userSchema = new schema({
         // unique: true,
         default: bcrypt.hashSync("likelemba1234", 5)
     },
-    manager_id: {
-        type: String,
+    manager: {
+        type: Map,
         required: false
     },
     sensibilisator: {
