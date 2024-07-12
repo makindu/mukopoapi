@@ -76,12 +76,6 @@ const UserSocket = async (io) => {
                     error: null,
                     data: result
                 });
-
-
-
-
-
-
             }
 
         } catch (error) {
