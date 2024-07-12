@@ -2,19 +2,10 @@ const mongoose = require("mongoose");
 const schema = require("mongoose").Schema;
 
 const companyaccountSchema = new schema({
-    code: {
+    description: {
         type: String,
-        required: true,
-        unique: true
     },
-    manager: {
-        type: Map,
-        of: {
-            type: String,
-        },
-        required: true
-    },
-    money_id: {
+    money: {
         type: String,
         required: true
     },
@@ -22,7 +13,7 @@ const companyaccountSchema = new schema({
         type: Number,
         default: 0,
         required: true
-    }
+    },
 });
 
 module.exports = mongoose.model("companyaccounts", companyaccountSchema);

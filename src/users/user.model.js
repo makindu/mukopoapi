@@ -25,6 +25,10 @@ const userSchema = new schema({
         type: String,
         required: false
     },
+    done_at: {
+        type: String,
+        required: false
+    },
     description: {
         type: String,
         required: false
@@ -42,8 +46,8 @@ const userSchema = new schema({
     password: {
         type: String,
         // required: true,
-        // unique: true,
-        default: bcrypt.hashSync("likelemba1234", 5)
+        unique: true,
+        // default: bcrypt.hashSync("likelemba1234", 5)
     },
     manager: {
         type: Map,

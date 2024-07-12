@@ -1,4 +1,6 @@
-const { notebook } = require("../../../db.provider");
+const { notebook, companyaccountsHistorys, componyaccounts } = require("../../../db.provider");
+const { generatePrefixedUUID, generateRandomString } = require("../../helper/uuid");
+// const {companyaccountHistoryControllerr} = require("../companyaccountHistory/companyaccountHistory.controller");
 const NotebooksController = {};
 
 NotebooksController.getAll = async (req, res) => {
@@ -32,14 +34,53 @@ NotebooksController.create = async (req, res) => {
             data: null,
         });
     }
+    if (!req.body.uuid) {
+        req.body.uuid = generatePrefixedUUID('NB')
+    }
 
     try {
         const result = await notebook.create(req.body);
-        return res.status(200).send({
-            message: "Success",
-            error: null,
-            data: result,
-        });
+        if (result) {
+
+            if (result.created_by.type == 'sensibilisator' || result.type == 'cashier') {
+                var creation_status = 'pending';
+            }
+
+            if (result.created_by.type == 'manager') {
+                let existingAccount = await componyaccounts.findOne({ money: result.money_id });
+
+                let newSold = result.amount;
+                if (existingAccount) {
+                    newSold += existingAccount.sold;
+                }
+                var creation_status = 'validated';
+                let companyaccount = {
+                    sold: newSold,
+                };
+                await componyaccounts.findByIdAndUpdate(existingAccount._id, companyaccount);
+            }
+
+            let companyaccountsHistory = {
+                uuid: generatePrefixedUUID('CAH'),
+                operation: result._id,
+                money_id: result.money_id,
+                type_operation: 'created_book',
+                amount: result.amount,
+                done_by: result.created_by,
+                done_at: result.done_at,
+                mouvment: 'entry',
+                creation_status: creation_status,
+                valideted_by: ''
+            }
+
+
+            await companyaccountsHistorys.create(companyaccountsHistory);
+            return res.status(200).send({
+                message: "Success",
+                error: null,
+                data: result,
+            });
+        }
     } catch (error) {
         return res.status(500).send({
             message: "Error occurred",

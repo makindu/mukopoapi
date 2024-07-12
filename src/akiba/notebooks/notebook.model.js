@@ -19,7 +19,7 @@ const notebookSchema = new schema({
         required: true,
     },
     created_by: {
-        type: String,
+        type: Map,
         required: true
     },
     bringby: {
@@ -34,13 +34,13 @@ const notebookSchema = new schema({
         type: Number,
         required: true
     },
-    maxoperations:{
-        type:Number,
-        default:27
+    maxoperations: {
+        type: Number,
+        default: 27
     },
-    note_status:{
-        type:String,
-        default:"pending"
+    note_status: {
+        type: String,
+        default: "pending"
     }
 });
 

@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const app = express();
 const http = require("http");
+const { companyaccountDefault } = require('./src/akiba/companyaccounts/companyaccount.controller');
 
 const server = http.createServer(app);
 const IO = require("socket.io")(server, { cors: { origin: "*" } });
@@ -11,7 +12,7 @@ const UserSocket = require("./src/users/user.socket");
 const NoteBookWebSocket = require("./src/akiba/notebooks/notebook.socket");
 const AccountsSocket = require("./src/akiba/accounts/account.socket");
 const NotebookOperationSocket = require("./src/akiba/history/history.socket");
-const companyaccountSocket = require("./src/akiba/companyaccounts/company.socket");
+const companyaccountSocket = require("./src/akiba/companyaccounts/companyaccount.socket");
 
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
@@ -29,12 +30,11 @@ IO.on("connection", (socket) => {
 });
 
 
-mongoose.connect(process.env.MONGO_URL, {}).then((result) => {
+mongoose.connect(process.env.MONGO_URL, {}).then(async (result) => {
     console.log("database connected");
     server.listen(3000);
-    console.log("App lunched at 3000");
+    companyaccountDefault();
 }
-
 ).catch((err) => {
     console.log(err);
     console.log("Erreur lors de la connexion avec la base de donnees.");

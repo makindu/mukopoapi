@@ -1,4 +1,4 @@
-const generatePrefixedUUID = require("../../helper/uuid");
+const { generatePrefixedUUID, generateRandomString } = require("../../helper/uuid");
 
 const mongoose = require("mongoose");
 const schema = require("mongoose").Schema;

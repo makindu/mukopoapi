@@ -7,7 +7,7 @@ const accountSchema = new schema({
         required: true,
         unique: true
     },
-    member_id: {
+    member: {
         type: String,
         required: true
     },

@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const generatePrefixedUUID = require("../../helper/uuid");
+const { generatePrefixedUUID, generateRandomString } = require("../../helper/uuid");
 const schema = require("mongoose").Schema;
 
 const akibaHistorySchema = new schema({

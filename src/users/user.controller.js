@@ -1,7 +1,7 @@
 const { user, account, notebook } = require("../../db.provider");
 const bcript = require("bcrypt");
 const UserController = {};
-
+const { generatePrefixedUUID, generateRandomString } = require('../helper/uuid');
 
 UserController.AttachAccount = async (userId) => {
   const accounts = await account.find({ member_id: userId });
@@ -44,7 +44,7 @@ UserController.getAll = async (req, res) => {
 
 
 UserController.create = async (req, res) => {
-  if (!req.body.fullname || !req.body.phone) {
+  if (!req.body.fullname || !req.body.phone || !req.body.done_at) {
     res
       .status(400)
       .send({
@@ -55,21 +55,86 @@ UserController.create = async (req, res) => {
   }
 
   try {
+    if (!req.body.uuid) {
+      req.body.uuid = generatePrefixedUUID("M");
+    }
     if (req.body.password) {
       req.body.password = bcript.hashSync(req.body.password, 10);
     }
 
     const result = await user.create(req.body);
-    return res.status(200).send({
-      message: "success",
-      error: null,
-      data: result
-    });
+    if (result) {
+
+      //creating accounts for the User
+      const accounts = await account.create(
+        {
+          code: "GOM-CDF-" + generateRandomString(10).toUpperCase(),
+          member: result._id,
+          money_id: "CDF",
+          sold: 0
+
+        },
+        {
+          code: "GOM-USD-" + generateRandomString(10).toUpperCase(),
+          member: result._id,
+          money_id: "USD",
+          sold: 0
+        },
+      );
+      const resultWithAccounts = {
+        ...result.toObject(),
+        accounts: accounts
+      };
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (req.body.email != null || req.body.email != '' && emailRegex.test(req.body.email)) {
+        const transporter = nodemailer.createTransport({
+          host: 'smtp.gmail.com', // Votre serveur SMTP
+          port: 587, // Port SMTP
+          secure: false, // true pour le port 465, false pour les autres ports
+          auth: {
+            user: 'wekaakibac@gmail.com', // Votre adresse e-mail
+            pass: 'svpi sjzp rjsz pvtm' // Votre mot de passe
+          },
+          tls: {
+            rejectUnauthorized: true,
+            minVersion: "TLSv1.2"
+          }
+        });
+
+        // Définir les options de l'e-mail
+        const mailOptions = {
+          from: 'wekaakibac@gmail.com', // Adresse de l'expéditeur
+          to: req.body.email, // Adresse du destinataire
+          subject: 'Creation compte Akiba', // Sujet de l'e-mail
+          text: 'This is a test email sent from Nodemailer', // Contenu textuel de l'e-mail
+          html: '<p>This is a test email sent from <b>Nodemailer</b></p>' // Contenu HTML de l'e-mail
+        };
+
+        try {
+          // Envoyer l'e-mail
+          var mail = await transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+              return console.log(error);
+            }
+            console.log('E-mail sent: ' + info.response);
+            res.status(200).send({
+              message: "success",
+              error: null,
+              data: resultWithAccounts
+            });
+          });
+        } catch (error) {
+          console.log(error);
+        }
+
+      }
+    }
   } catch (error) {
+    console.error('Error creating user or accounts:', error);
     return res
       .status(500)
       .send({
-        message: "error occured",
+        message: "error occuredddddddddd",
         error: error,
         data: null
       });

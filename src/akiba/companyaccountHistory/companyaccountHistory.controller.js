@@ -1,13 +1,14 @@
-const { companyaccount } = require("../../../db.provider");
-const companyaccountControllerr = {};
+const { companyaccountsHistorys } = require("../../../db.provider");
+const { generatePrefixedUUID, generateRandomString } = require("../../helper/uuid");
+const companyaccountHistoryControllerr = {};
 
-companyaccountControllerr.getAll = async (req, res) => {
+companyaccountHistoryControllerr.getAll = async (req, res) => {
   try {
-    const companyaccounts = await companyaccount.find({});
+    const companyaccountHistory = await companyaccountsHistorys.find({});
     res.status(200).send({
       message: "success",
       error: null,
-      data: companyaccounts
+      data: companyaccountHistory
     });
   } catch (error) {
     res
@@ -20,12 +21,16 @@ companyaccountControllerr.getAll = async (req, res) => {
   }
 }
 
-companyaccountControllerr.create = async (req, res) => {
+companyaccountHistoryControllerr.create = async (req, res) => {
   if (
-    !req.body.code &&
-    !req.body.manager &&
-    !req.body.money_id &&
-    !req.body.sold
+    !req.body.operation ||
+    !req.body.type_operation ||
+    !req.body.amount ||
+    !req.body.done_by ||
+    !req.body.done_at ||
+    !req.body.mouvment ||
+    !req.body.valideted_by
+
   ) {
     res
       .status(400)
@@ -35,16 +40,20 @@ companyaccountControllerr.create = async (req, res) => {
         data: null
       });
   }
+  if (!req.body.uuid) {
+    req.body.uuid = generatePrefixedUUID("OPH");
+  }
 
   try {
-    const result = await companyaccount.create(req.body);
+    const result = await companyaccountsHistorys.create(req.body);
     res.status(200).send({
       message: "success",
       error: null,
       data: result
     });
   } catch (error) {
-    res
+    console.log(error);
+    return res
       .status(500)
       .send({
         message: "error occured",
@@ -54,7 +63,7 @@ companyaccountControllerr.create = async (req, res) => {
   }
 }
 
-companyaccountControllerr.getSingle = async (req, res) => {
+companyaccountHistoryControllerr.getSingle = async (req, res) => {
 
   if (!req.params.id) {
     res
@@ -63,7 +72,7 @@ companyaccountControllerr.getSingle = async (req, res) => {
     return;
   }
   try {
-    const data = await companyaccount.findById(req.params.id);
+    const data = await companyaccountsHistorys.findById(req.params.id);
     res.status(200).send({ message: "success", error: null, data: data });
   } catch (error) {
     res
@@ -72,7 +81,7 @@ companyaccountControllerr.getSingle = async (req, res) => {
   }
 };
 
-companyaccountControllerr.update = async (req, res) => {
+companyaccountHistoryControllerr.update = async (req, res) => {
   if (!req.params.id) {
     res
       .status(400)
@@ -82,7 +91,7 @@ companyaccountControllerr.update = async (req, res) => {
 
   try {
 
-    let result = await companyaccount.findByIdAndUpdate(req.params.id, req.body);
+    let result = await companyaccountsHistorys.findByIdAndUpdate(req.params.id, req.body);
     if (!result) {
       res.status(404).send({
         message: "not found",
@@ -94,7 +103,7 @@ companyaccountControllerr.update = async (req, res) => {
     return res.status(200).send({
       message: "success",
       error: null,
-      data: await companyaccount.findById(req.params.id)
+      data: await companyaccountsHistorys.findById(req.params.id)
     });
   } catch (error) {
     return res
@@ -103,7 +112,7 @@ companyaccountControllerr.update = async (req, res) => {
   }
 };
 
-companyaccountControllerr.delete = async (req, res) => {
+companyaccountHistoryControllerr.delete = async (req, res) => {
   if (!req.params.id) {
     res
       .status(400)
@@ -113,7 +122,7 @@ companyaccountControllerr.delete = async (req, res) => {
 
   try {
 
-    let result = await companyaccount.findByIdAndDelete(req.params.id);
+    let result = await companyaccountsHistorys.findByIdAndDelete(req.params.id);
     if (!result) {
       res.status(404).send({
         message: "not found",
@@ -133,4 +142,4 @@ companyaccountControllerr.delete = async (req, res) => {
   }
 };
 
-module.exports = companyaccountControllerr;
+module.exports = companyaccountHistoryControllerr;

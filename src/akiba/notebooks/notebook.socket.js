@@ -1,29 +1,68 @@
-const { notebook } = require("../../../db.provider");
+const { notebook, companyaccountsHistorys, componyaccounts } = require("../../../db.provider");
+const { generatePrefixedUUID, generateRandomString } = require("../../helper/uuid");
+
 const NoteBookWebSocket = async (io) => {
     io.on("create_notebook", async (data) => {
-        if (!data.member_id &&
-            !data.nature_id &&
-            !data.account_id &&
-            !data.type_id &&
-            !data.created_by &&
-            !data.bringby &&
-            !data.money_id &&
-            !data.amount) {
+
+        if (!req.body.member_id ||
+            !req.body.nature_id ||
+            !req.body.account_id ||
+            !req.body.type_id ||
+            !req.body.created_by ||
+            !req.body.bringby ||
+            !req.body.money_id ||
+            !req.body.amount) {
             io.emit("create_notebook", {
                 message: "error occured",
                 error: null,
                 data: null
             });
         }
+        if (!req.body.uuid) {
+            req.body.uuid = generatePrefixedUUID('NB')
+        }
         try {
-            let result = await notebook.create(data);
+            const result = await notebook.create(req.body);
             if (result) {
-                io.emit("create_notebook", {
-                    status: 200,
-                    message: "success",
+
+                if (result.created_by.type == 'sensibilisator' || result.type == 'cashier') {
+                    var creation_status = 'pending';
+                }
+
+                if (result.created_by.type == 'manager') {
+                    let existingAccount = await componyaccounts.findOne({ money: result.money_id });
+
+                    let newSold = result.amount;
+                    if (existingAccount) {
+                        newSold += existingAccount.sold;
+                    }
+                    var creation_status = 'validated';
+                    let companyaccount = {
+                        sold: newSold,
+                    };
+                    await componyaccounts.findByIdAndUpdate(existingAccount._id, companyaccount);
+                }
+
+                let companyaccountsHistory = {
+                    uuid: generatePrefixedUUID('CAH'),
+                    operation: result._id,
+                    money_id: result.money_id,
+                    type_operation: 'created_book',
+                    amount: result.amount,
+                    done_by: result.created_by,
+                    done_at: result.done_at,
+                    mouvment: 'entry',
+                    creation_status: creation_status,
+                    valideted_by: ''
+                }
+
+
+                await companyaccountsHistorys.create(companyaccountsHistory);
+                return res.status(200).send({
+                    message: "Success",
                     error: null,
-                    data: result
-                })
+                    data: result,
+                });
             }
         } catch (error) {
             io.emit("create_notebook", {
