@@ -3,8 +3,8 @@ const { generatePrefixedUUID, generateRandomString } = require("../../helper/uui
 
 const NoteBookWebSocket = async (io) => {
     io.on("create_notebook", async (data) => {
-        console.log(data);
-        if (!data.member_id ||
+        console.log('note book creation mode',data);
+        if (!data.member ||
             !data.nature_id ||
             !data.account_id ||
             !data.type_id ||
@@ -18,22 +18,25 @@ const NoteBookWebSocket = async (io) => {
                 data: null
             });
         }
-        if (!data.uuid) {
-            data.uuid = generatePrefixedUUID('NB')
-        }
+
+       
         try {
+            if (!data.uuid) {
+                data.uuid = generatePrefixedUUID('NB')
+            }
+            console.log('note book created',data);
             const result = await notebook.create(data);
-            // console.log(result);
             if (result) {
+                // console.log('result type',result.created_by.type);
                 let creation_status = 'pending';
 
-                if (result.created_by.type == 'sensibilisator' || result.type == 'cashier') {
+                if (data.created_by.type === 'sensibilisator' || data.created_by.type == 'cashier') {
                     creation_status = 'pending';
                 }
 
-                if (result.created_by.type == 'manager') {
+                if (data.created_by.type == 'manager') {
                     let existingAccount = await componyaccounts.findOne({ money: result.money });
-
+                    console.log('tub finded',existingAccount);
                     let newSold = result.amount;
                     if (existingAccount) {
                         newSold += existingAccount.sold;
@@ -57,7 +60,7 @@ const NoteBookWebSocket = async (io) => {
                     creation_status: creation_status,
                     validated_by: result.created_by
                 }
-                console.log(companyaccountsHistory);
+                // console.log(companyaccountsHistory);
 
 
                 await companyaccountsHistorys.create(companyaccountsHistory);
@@ -68,7 +71,7 @@ const NoteBookWebSocket = async (io) => {
                 });
             }
         } catch (error) {
-            console.log(error)
+            // console.log(error)
             io.emit("create_notebook", {
                 message: "error occured",
                 error: null,

@@ -150,12 +150,12 @@ companyaccountControllerr.delete = async (req, res) => {
 async function companyaccountDefault() {
   let accountData = [
     {
-      description: "compte franc",
+      description: "compte en francs congolais",
       money: "CDF",
       sold: 0
     },
     {
-      description: "compte dollard",
+      description: "compte dollars americains",
       money: "USD",
       sold: 0
     },

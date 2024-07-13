@@ -31,6 +31,10 @@ const companyaccountHistorySchema = new schema({
     done_at: {
         type: String,
         required: true
+    },  
+    money: {
+        type: String,
+        required: true
     },
     validation: {
         type: Boolean,
