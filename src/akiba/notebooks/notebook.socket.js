@@ -3,40 +3,42 @@ const { generatePrefixedUUID, generateRandomString } = require("../../helper/uui
 
 const NoteBookWebSocket = async (io) => {
     io.on("create_notebook", async (data) => {
-
-        if (!req.body.member_id ||
-            !req.body.nature_id ||
-            !req.body.account_id ||
-            !req.body.type_id ||
-            !req.body.created_by ||
-            !req.body.bringby ||
-            !req.body.money_id ||
-            !req.body.amount) {
+        console.log(data);
+        if (!data.member_id ||
+            !data.nature_id ||
+            !data.account_id ||
+            !data.type_id ||
+            !data.created_by ||
+            !data.bringby ||
+            !data.money ||
+            !data.amount) {
             io.emit("create_notebook", {
                 message: "error occured",
                 error: null,
                 data: null
             });
         }
-        if (!req.body.uuid) {
-            req.body.uuid = generatePrefixedUUID('NB')
+        if (!data.uuid) {
+            data.uuid = generatePrefixedUUID('NB')
         }
         try {
-            const result = await notebook.create(req.body);
+            const result = await notebook.create(data);
+            // console.log(result);
             if (result) {
+                let creation_status = 'pending';
 
                 if (result.created_by.type == 'sensibilisator' || result.type == 'cashier') {
-                    var creation_status = 'pending';
+                    creation_status = 'pending';
                 }
 
                 if (result.created_by.type == 'manager') {
-                    let existingAccount = await componyaccounts.findOne({ money: result.money_id });
+                    let existingAccount = await componyaccounts.findOne({ money: result.money });
 
                     let newSold = result.amount;
                     if (existingAccount) {
                         newSold += existingAccount.sold;
                     }
-                    var creation_status = 'validated';
+                    creation_status = 'validated';
                     let companyaccount = {
                         sold: newSold,
                     };
@@ -45,28 +47,30 @@ const NoteBookWebSocket = async (io) => {
 
                 let companyaccountsHistory = {
                     uuid: generatePrefixedUUID('CAH'),
-                    operation: result._id,
-                    money_id: result.money_id,
+                    operation: data.operation,
+                    money: result.money,
                     type_operation: 'created_book',
                     amount: result.amount,
                     done_by: result.created_by,
                     done_at: result.done_at,
                     mouvment: 'entry',
                     creation_status: creation_status,
-                    valideted_by: ''
+                    validated_by: result.created_by
                 }
+                console.log(companyaccountsHistory);
 
 
                 await companyaccountsHistorys.create(companyaccountsHistory);
-                return res.status(200).send({
-                    message: "Success",
+                io.emit("create_notebook", {
+                    message: "success",
                     error: null,
                     data: result,
                 });
             }
         } catch (error) {
+            console.log(error)
             io.emit("create_notebook", {
-                message: "error ocured",
+                message: "error occured",
                 error: null,
                 data: null
             })

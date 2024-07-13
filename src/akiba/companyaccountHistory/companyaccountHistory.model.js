@@ -8,10 +8,9 @@ const companyaccountHistorySchema = new schema({
         unique: true
     },
     operation: {
-        type: Map,
-        of: {
-            type: String,
-        },
+        type: String,
+        required: true
+
     },
     type_operation: {
         type: String,
@@ -41,10 +40,13 @@ const companyaccountHistorySchema = new schema({
         type: String,
         required: true
     },
-    valideted_by: {
+    creation_status: {
         type: String,
-        default: 0,
         required: true
+    },
+    validated_by: {
+        type: Map,
+        required: false
     }
 });
 

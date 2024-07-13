@@ -11,7 +11,7 @@ const accountSchema = new schema({
         type: String,
         required: true
     },
-    money_id: {
+    money: {
         type: String,
         required: true
     },

@@ -4,7 +4,7 @@ const UserController = {};
 const { generatePrefixedUUID, generateRandomString } = require('../helper/uuid');
 
 UserController.AttachAccount = async (userId) => {
-  const accounts = await account.find({ member_id: userId });
+  const accounts = await account.find({ member: userId });
   const accountswithnotbooks = await Promise.all(accounts.map(async (element) => {
     const account = await UserController.AccountNotebooks(element._id);
     return {

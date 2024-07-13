@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt');
 const { user, account } = require("../../db.provider");
 const bcript = require("bcrypt");
 const path = require('path');
-const generatePrefixedUUID = require("../../src/helper/uuid");
+const { generatePrefixedUUID, generateRandomString } = require("../../src/helper/uuid");
 const { emailing, findHtmlFile } = require("../helper/mail_sender");
 const UserSocket = async (io) => {
     io.on("create_user", async (data) => {
@@ -16,6 +16,49 @@ const UserSocket = async (io) => {
         }
 
         try {
+            // Vérifier si l'utilisateur existe déjà
+            const existingUsermail = await user.findOne({
+                $or: [
+                    { email: data.email },
+
+                ]
+            });
+            const existingUserphone = await user.findOne({
+                $or: [
+                    { phone: data.phone },
+
+
+                ]
+            });
+            const existingUserfullname = await user.findOne({
+                $or: [
+                    { fullname: data.fullname },
+
+
+                ]
+            });
+
+            if (existingUsermail) {
+                return io.emit("create_user", {
+                    message: "cet email existe déjà",
+                    error: null,
+                    data: null
+                });
+            }
+            if (existingUserphone) {
+                return io.emit("create_user", {
+                    message: "ce numéro de téléphone existe déjà",
+                    error: null,
+                    data: null
+                });
+            }
+            if (existingUserfullname) {
+                return io.emit("create_user", {
+                    message: "ce nom d'utilisateur existe déjà",
+                    error: null,
+                    data: null
+                });
+            }
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             var passowrd = data.password;
             if (data.password) {
@@ -54,19 +97,19 @@ const UserSocket = async (io) => {
                 const accounts = await account.create(
                     {
                         code: "GOM-CDF" + result._id,
-                        member_id: result._id,
-                        money_id: "CDF",
+                        member: result._id,
+                        money: "CDF",
                         sold: 0
 
                     },
                     {
                         code: "GOM-USD" + result._id,
-                        member_id: result._id,
-                        money_id: "USD",
+                        member: result._id,
+                        money: "USD",
                         sold: 0
                     },
                 );
-                result = {
+                let resultdata = {
                     ...result.toObject(),
                     accounts: accounts
                 };
@@ -74,7 +117,7 @@ const UserSocket = async (io) => {
                     status: 200,
                     message: "success",
                     error: null,
-                    data: result
+                    data: resultdata
                 });
             }
 

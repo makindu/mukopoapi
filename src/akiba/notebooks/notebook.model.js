@@ -2,8 +2,8 @@ const mongoose = require("mongoose");
 const schema = require("mongoose").Schema;
 
 const notebookSchema = new schema({
-    member_id: {
-        type: String,
+    member: {
+        type: Map,
         required: true
     },
     nature_id: {
@@ -26,7 +26,11 @@ const notebookSchema = new schema({
         type: String,
         required: true
     },
-    money_id: {
+    money: {
+        type: String,
+        required: true
+    },
+    done_at: {
         type: String,
         required: true
     },
