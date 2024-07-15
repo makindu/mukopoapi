@@ -1,4 +1,3 @@
-const { generatePrefixedUUID, generateRandomString } = require("../../helper/uuid");
 
 const mongoose = require("mongoose");
 const schema = require("mongoose").Schema;
@@ -6,36 +5,34 @@ const schema = require("mongoose").Schema;
 const notebookOperationSchema = new schema({
     uuid: {
         type: String,
-        default: generatePrefixedUUID('RAS'),
         required: false
     },
-    member_id:
+    member:
     {
         type: Map,
         required: true
     }
     ,
     notebook: {
-        type: String,
+        type: Map,
         required: true
     },
     collecter: {
         type: String,
-        required: true,
     },
     account: {
         type: String,
         required: true,
     },
     done_by: {
-        type: String,
+        type: Map,
         required: true
     },
     amount: {
         type: Number,
         required: true
     },
-    money_id: {
+    money: {
         type: String,
         required: true
     },

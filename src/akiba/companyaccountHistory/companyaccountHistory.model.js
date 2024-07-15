@@ -23,15 +23,12 @@ const companyaccountHistorySchema = new schema({
     },
     done_by: {
         type: Map,
-        of: {
-            type: String,
-        },
         required: true,
     },
     done_at: {
         type: String,
         required: true
-    },  
+    },
     money: {
         type: String,
         required: true
@@ -51,7 +48,16 @@ const companyaccountHistorySchema = new schema({
     validated_by: {
         type: Map,
         required: false
-    }
+    },
+    sold_operation: {
+        type: Number,
+        required: false,
+        default: 27
+    },
+    observation: {
+        type: String,
+        required: false
+    },
 });
 
 module.exports = mongoose.model("companyaccountsHistory", companyaccountHistorySchema);

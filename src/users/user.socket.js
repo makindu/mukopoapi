@@ -17,48 +17,48 @@ const UserSocket = async (io) => {
 
         try {
             // Vérifier si l'utilisateur existe déjà
-            const existingUsermail = await user.findOne({
-                $or: [
-                    { email: data.email },
+            // const existingUsermail = await user.findOne({
+            //     $or: [
+            //         { email: data.email },
 
-                ]
-            });
-            const existingUserphone = await user.findOne({
-                $or: [
-                    { phone: data.phone },
-
-
-                ]
-            });
-            const existingUserfullname = await user.findOne({
-                $or: [
-                    { fullname: data.fullname },
+            //     ]
+            // });
+            // const existingUserphone = await user.findOne({
+            //     $or: [
+            //         { phone: data.phone },
 
 
-                ]
-            });
+            //     ]
+            // });
+            // const existingUserfullname = await user.findOne({
+            //     $or: [
+            //         { fullname: data.fullname },
 
-            if (existingUsermail) {
-                return io.emit("create_user", {
-                    message: "cet email existe déjà",
-                    error: null,
-                    data: null
-                });
-            }
-            if (existingUserphone) {
-                return io.emit("create_user", {
-                    message: "ce numéro de téléphone existe déjà",
-                    error: null,
-                    data: null
-                });
-            }
-            if (existingUserfullname) {
-                return io.emit("create_user", {
-                    message: "ce nom d'utilisateur existe déjà",
-                    error: null,
-                    data: null
-                });
-            }
+
+            //     ]
+            // });
+
+            // if (existingUsermail) {
+            //     return io.emit("create_user", {
+            //         message: "diplicated email",
+            //         error: null,
+            //         data: null
+            //     });
+            // }
+            // if (existingUserphone) {
+            //     return io.emit("create_user", {
+            //         message: "diplicated phone",
+            //         error: null,
+            //         data: null
+            //     });
+            // }
+            // if (existingUserfullname) {
+            //     return io.emit("create_user", {
+            //         message: "diplicated fullname",
+            //         error: null,
+            //         data: null
+            //     });
+            // }
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             var passowrd = data.password;
             if (data.password) {
@@ -99,14 +99,14 @@ const UserSocket = async (io) => {
                         code: "GOM-CDF" + result._id,
                         member: result._id,
                         money: "CDF",
-                        sold: 0
+                        sold: 0,
 
                     },
                     {
                         code: "GOM-USD" + result._id,
                         member: result._id,
                         money: "USD",
-                        sold: 0
+                        sold: 0,
                     },
                 );
                 let resultdata = {

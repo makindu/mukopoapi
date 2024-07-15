@@ -10,6 +10,10 @@ const notebookSchema = new schema({
         type: String,
         required: true
     },
+    uuid: {
+        type: String,
+        required: true
+    },
     account_id: {
         type: String,
         required: true,
@@ -42,9 +46,16 @@ const notebookSchema = new schema({
         type: Number,
         default: 27
     },
+    operation_done: {
+        type: Number,
+        default: 0
+    },
+    sold_operation: {
+        type: Number,
+        default: 27
+    },
     note_status: {
         type: String,
-        default: "pending"
     }
 });
 

@@ -18,7 +18,8 @@ const accountSchema = new schema({
     sold: {
         type: Number,
         default: 0
-    }
+    },
+
 });
 
 module.exports = mongoose.model("accounts", accountSchema);

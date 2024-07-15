@@ -1,7 +1,8 @@
 const { user, account, notebook } = require("../../db.provider");
 const bcript = require("bcrypt");
 const UserController = {};
-const { generatePrefixedUUID, generateRandomString } = require('../helper/uuid');
+const { generatePrefixedUUID, generateRandomString } = require("../../src/helper/uuid");
+const { emailing, findHtmlFile } = require("../helper/mail_sender");
 
 UserController.AttachAccount = async (userId) => {
   const accounts = await account.find({ member: userId });
@@ -54,87 +55,121 @@ UserController.create = async (req, res) => {
       });
   }
 
+
+
+
   try {
-    if (!req.body.uuid) {
-      req.body.uuid = generatePrefixedUUID("M");
-    }
+    // Vérifier si l'utilisateur existe déjà
+    // const existingUsermail = await user.findOne({
+    //   $or: [
+    //     { email: req.body.email },
+
+    //   ]
+    // });
+    // const existingUserphone = await user.findOne({
+    //   $or: [
+    //     { phone: req.body.phone },
+
+
+    //   ]
+    // });
+    // const existingUserfullname = await user.findOne({
+    //   $or: [
+    //     { fullname: req.body.fullname },
+
+
+    //   ]
+    // });
+
+    // if (existingUsermail) {
+    //   return res.status(500).send({
+    //     message: "cet email existe déjà",
+    //     error: 'mail_exist',
+    //     data: null
+    //   });
+
+    // }
+    // if (existingUserphone) {
+    //   return res.status(500).send({
+    //     message: "ce numero de téléphone existe déjà",
+    //     error: 'phone_exist',
+    //     data: null
+    //   });
+    // }
+    // if (existingUserfullname) {
+    //   return res.status(500).send({
+    //     message: "ce nom existe déjà",
+    //     error: 'naame_exist',
+    //     data: null
+    //   });
+    // }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    var passowrd = req.body.password;
     if (req.body.password) {
       req.body.password = bcript.hashSync(req.body.password, 10);
     }
+    req.body.uuid = generatePrefixedUUID('M');
+    let result = await user.create(req.body);
+    if (typeof result.email !== null && emailRegex.test(result.email)) {
+      try {
+        // Chemin de départ pour la recherche
+        const baseDirectory = path.join(__dirname, '../helper/mailHtml');
+        const fileName = 'welcome.html';
 
-    const result = await user.create(req.body);
+        // Chercher et envoyer l'email
+        findHtmlFile(baseDirectory, fileName, async (err, filePath) => {
+          if (err) {
+            console.error('Erreur lors de la recherche du fichier HTML :', err);
+          } else if (filePath) {
+            const replacements = {
+              username: result.fullname,
+              password: passowrd,
+            };
+            await emailing(result.email, "BIENVENUE SUR WEKA AKIBA", filePath, replacements, '');
+          } else {
+            console.log('Fichier HTML non trouvé');
+          }
+        });
+
+      } catch (error) {
+        console.log(error);
+      }
+    }
     if (result) {
 
       //creating accounts for the User
       const accounts = await account.create(
         {
-          code: "GOM-CDF-" + generateRandomString(10).toUpperCase(),
+          code: "GOM-CDF" + result._id,
           member: result._id,
-          money_id: "CDF",
+          money: "CDF",
           sold: 0
 
         },
         {
-          code: "GOM-USD-" + generateRandomString(10).toUpperCase(),
+          code: "GOM-USD" + result._id,
           member: result._id,
-          money_id: "USD",
+          money: "USD",
           sold: 0
         },
       );
-      const resultWithAccounts = {
+      let resultdata = {
         ...result.toObject(),
         accounts: accounts
       };
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (req.body.email != null || req.body.email != '' && emailRegex.test(req.body.email)) {
-        const transporter = nodemailer.createTransport({
-          host: 'smtp.gmail.com', // Votre serveur SMTP
-          port: 587, // Port SMTP
-          secure: false, // true pour le port 465, false pour les autres ports
-          auth: {
-            user: 'wekaakibac@gmail.com', // Votre adresse e-mail
-            pass: 'svpi sjzp rjsz pvtm' // Votre mot de passe
-          },
-          tls: {
-            rejectUnauthorized: true,
-            minVersion: "TLSv1.2"
-          }
-        });
-
-        // Définir les options de l'e-mail
-        const mailOptions = {
-          from: 'wekaakibac@gmail.com', // Adresse de l'expéditeur
-          to: req.body.email, // Adresse du destinataire
-          subject: 'Creation compte Akiba', // Sujet de l'e-mail
-          text: 'This is a test email sent from Nodemailer', // Contenu textuel de l'e-mail
-          html: '<p>This is a test email sent from <b>Nodemailer</b></p>' // Contenu HTML de l'e-mail
-        };
-
-        try {
-          // Envoyer l'e-mail
-          var mail = await transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-              return console.log(error);
-            }
-            console.log('E-mail sent: ' + info.response);
-            res.status(200).send({
-              message: "success",
-              error: null,
-              data: resultWithAccounts
-            });
-          });
-        } catch (error) {
-          console.log(error);
-        }
-
-      }
+      return res.status(200).send({
+        message: "success",
+        error: null,
+        data: resultdata
+      });
     }
+
   } catch (error) {
     console.error('Error creating user or accounts:', error);
     return res
       .status(500)
       .send({
-        message: "error occuredddddddddd",
+        message: "error occured",
         error: error,
         data: null
       });
