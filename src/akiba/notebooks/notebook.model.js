@@ -34,6 +34,11 @@ const notebookSchema = new schema({
         type: String,
         required: true
     },
+    sold: {
+        type: Number,
+        required: true,
+        default: 0,
+    },
     done_at: {
         type: String,
         required: true

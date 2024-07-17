@@ -11,6 +11,7 @@ async function creatingNotebook(data) {
             note_status = 'validated';
         }
         data.note_status = note_status;
+        data.sold = 0;
         const result = await notebook.create(data);
         if (result) {
             // console.log('result type',result.created_by.type); done_by

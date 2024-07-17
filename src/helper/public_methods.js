@@ -94,12 +94,22 @@ async function accounnotbookUpdated(data) {
 async function notbookUpdated(data) {
     try {
         let NoteBookMember = await notebook.findOne({ _id: data.notebook._id });
+        let status = 'validated';
+        if (NoteBookMember.operation_done == 26) {
+
+            status = "unavailable";
+        };
         let MemberNotbook = {
             operation_done: NoteBookMember.operation_done + 1,
             sold_operation: NoteBookMember.sold_operation - 1,
+            note_status: status,
+            sold: (NoteBookMember.amount * (NoteBookMember.operation_done + 1))
         };
+        MemberNotbook.sold = MemberNotbook.sold - NoteBookMember.amount;
         let resultat = await notebook.findByIdAndUpdate(data.notebook._id, MemberNotbook);
+        console.log("here updating status");
         if (resultat) {
+            console.log("here updating status");
             return {
                 message: true,
                 error: null,

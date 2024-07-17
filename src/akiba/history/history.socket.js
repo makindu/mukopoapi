@@ -83,8 +83,8 @@ const NotebookOperationSocket = async (io) => {
                     let lengthHistory = parseInt(data.amount) / parseInt(existingNoteBook.data.amount);
                     let singleSold = parseInt(data.amount) / Math.ceil(lengthHistory);
                     let memberAccountUpdate = await accounnotbookUpdated(data);
+                    let total_deposit = 0;
                     if (memberAccountUpdate.message == true) {
-
                         let historyMembers = [];
                         for (let index = 0; index < Math.ceil(lengthHistory); index++) {
                             console.log("here", lengthHistory, data.amount, existingNoteBook.data.amount);
@@ -100,7 +100,9 @@ const NotebookOperationSocket = async (io) => {
                                 data.amount = singleSold;
                                 let historyMember = await historyMemberPassed(data);
                                 if (historyMember.message == true) {
+                                    total_deposit = total_deposit + singleSold;
                                     historyMembers.push(historyMember.data);
+                                    console.log("total multiple add", total_deposit);
                                 }
                             }
                             else {
@@ -111,16 +113,17 @@ const NotebookOperationSocket = async (io) => {
                                     data: null
                                 });
                             }
-                            break;
                         }
 
                         if (historyMembers.length > 0) {
+                            historyMembers[0].amount = total_deposit;
                             io.emit("new_notebook_operation", {
                                 status: 200,
                                 message: "success",
                                 error: null,
-                                data: historyMembers
+                                data: historyMembers[0]
                             });
+                            return;
                         }
                     }
                 }
