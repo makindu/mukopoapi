@@ -27,7 +27,7 @@ const notebookSchema = new schema({
         required: true
     },
     bringby: {
-        type: String,
+        type: Map,
         required: true
     },
     money: {

@@ -1,6 +1,6 @@
-const mongoose = require("mongoose");
-const schema = require("mongoose").Schema;
 const bcrypt = require('bcrypt');
+const schema = require("mongoose").Schema;
+const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const generatePrefixedUUID = require("../../src/helper/uuid");
 // const validator = require('validator');

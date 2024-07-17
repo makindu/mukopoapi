@@ -1,8 +1,9 @@
-const { notebook, companyaccountsHistorys, componyaccounts } = require("../../../db.provider");
+const { notebook } = require('../../../db.provider');
 const creatingNotebook = require('./methods');
 
 const NoteBookWebSocket = async (io) => {
     io.on("create_notebook", async (data) => {
+
         if (!data.member ||
             !data.nature_id ||
             !data.account_id ||
@@ -11,7 +12,7 @@ const NoteBookWebSocket = async (io) => {
             !data.bringby ||
             !data.money ||
             !data.amount) {
-            // console.log('error');
+            console.log('error');
             io.emit("create_notebook", {
                 message: "error occured",
                 error: null,
@@ -21,13 +22,13 @@ const NoteBookWebSocket = async (io) => {
 
 
         try {
-            // console.log('created begeen');
+            console.log('created begeen');
             const result = await creatingNotebook(data);
-            // console.log('created pass');
+            console.log('created pass');
             console.log(result);
             if (result.message == 'success') {
 
-                // console.log('created');
+                console.log('created');
                 return io.emit("create_notebook", {
                     message: "success",
                     error: null,
@@ -35,7 +36,7 @@ const NoteBookWebSocket = async (io) => {
                 })
             }
             else if (result.message == 'error') {
-                // console.log('message error');
+                console.log('message error');
                 return io.emit("create_notebook", {
                     message: "error occured",
                     error: null,
@@ -44,7 +45,7 @@ const NoteBookWebSocket = async (io) => {
             }
 
         } catch (error) {
-            // console.log(error)
+            console.log(error)
             io.emit("create_notebook", {
                 message: "error occured",
                 error: error,

@@ -32,7 +32,7 @@ IO.on("connection", (socket) => {
 
 mongoose.connect(process.env.MONGO_URL, {}).then(async (result) => {
     console.log("database connected");
-    server.listen(3000);
+    server.listen(4000);
     companyaccountDefault();
 }
 ).catch((err) => {

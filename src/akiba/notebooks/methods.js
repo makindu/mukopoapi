@@ -13,16 +13,17 @@ async function creatingNotebook(data) {
         data.note_status = note_status;
         const result = await notebook.create(data);
         if (result) {
-            // console.log('result type',result.created_by.type);
+            // console.log('result type',result.created_by.type); done_by
             let creation_status = 'pending';
+            let validation = false;
             if (data.created_by.type == 'manager') {
                 let existingAccount = await componyaccounts.findOne({ money: result.money });
-                console.log('tub finded', existingAccount);
                 let newSold = result.amount;
                 if (existingAccount) {
                     newSold += existingAccount.sold;
                 }
                 creation_status = 'validated';
+                validation = true;
                 let companyaccount = {
                     sold: newSold,
                 };
@@ -38,20 +39,38 @@ async function creatingNotebook(data) {
                 done_by: result.created_by,
                 done_at: result.done_at,
                 mouvment: 'entry',
+                collecter: data.bringby,
+                validation: validation,
                 observation: data.observation,
                 creation_status: creation_status,
-                sold_operation: result.sold_operation - 1,
+                sold_operation: result.sold_operation,
                 validated_by: result.created_by
             }
-            // console.log(companyaccountsHistory);
+            console.log(companyaccountsHistory);
 
 
             await companyaccountsHistorys.create(companyaccountsHistory);
+            if (companyaccountsHistorys) {
+                return {
+                    'message': "success",
+                    'data': result,
+                    'error': null
+                };
+            } else {
+                return {
+                    'message': "error occured",
+                    'data': null,
+                    'error': null
+
+                }
+            }
+        } else {
             return {
-                'message': "success",
-                'data': result,
+                'message': "error occured",
+                'data': null,
                 'error': null
-            };;
+
+            }
         }
     } catch (error) {
         return {

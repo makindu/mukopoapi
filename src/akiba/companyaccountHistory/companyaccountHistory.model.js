@@ -25,6 +25,10 @@ const companyaccountHistorySchema = new schema({
         type: Map,
         required: true,
     },
+    collecter: {
+        type: Map,
+        // required: true,
+    },
     done_at: {
         type: String,
         required: true
@@ -35,6 +39,7 @@ const companyaccountHistorySchema = new schema({
     },
     validation: {
         type: Boolean,
+        default: false,
 
     },
     mouvment: {
@@ -47,12 +52,7 @@ const companyaccountHistorySchema = new schema({
     },
     validated_by: {
         type: Map,
-        required: false
-    },
-    sold_operation: {
-        type: Number,
-        required: false,
-        default: 27
+        // required: false
     },
     observation: {
         type: String,

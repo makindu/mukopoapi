@@ -56,14 +56,21 @@ async function accountexist(data) {
     }
 
 }
-async function notbookUpdated(existingNotbook, newDataNotbook) {
+async function accounnotbookUpdated(data) {
     try {
-        let notebookUpdated = await notebook.findByIdAndUpdate(existingNotbook.data._id, newDataNotbook);
-        if (notebookUpdated) {
+        let accountMember = await account.findOne({ _id: data.account });
+        let newSold = data.amount;
+
+        newSold += accountMember.sold;
+        let Memberaccount = {
+            sold: newSold,
+        };
+        let resultat = await account.findByIdAndUpdate(data.account, Memberaccount);
+        if (resultat) {
             return {
                 message: true,
                 error: null,
-                data: notebookUpdated
+                data: resultat
             }
         }
         else {
@@ -73,6 +80,40 @@ async function notbookUpdated(existingNotbook, newDataNotbook) {
                 data: null
             }
         }
+
+    } catch (error) {
+        console.log(error);
+        return {
+            message: false,
+            error: error,
+            data: null
+        }
+
+    }
+}
+async function notbookUpdated(data) {
+    try {
+        let NoteBookMember = await notebook.findOne({ _id: data.notebook._id });
+        let MemberNotbook = {
+            operation_done: NoteBookMember.operation_done + 1,
+            sold_operation: NoteBookMember.sold_operation - 1,
+        };
+        let resultat = await notebook.findByIdAndUpdate(data.notebook._id, MemberNotbook);
+        if (resultat) {
+            return {
+                message: true,
+                error: null,
+                data: resultat
+            }
+        }
+        else {
+            return {
+                message: false,
+                error: "data not found",
+                data: null
+            }
+        }
+
     } catch (error) {
         return {
             message: false,
@@ -82,7 +123,7 @@ async function notbookUpdated(existingNotbook, newDataNotbook) {
 
     }
 }
-async function historyMemberPassed(data, resultat) {
+async function historyMemberPassed(data) {
     try {
         let historySaved = await notebookoperation.create(data);
         if (historySaved) {
@@ -143,33 +184,34 @@ async function companyaccountFindAndUpdateOne(data) {
         }
     }
 }
-async function componyaccountsHistory(data, notebookoperation, notebookexist, type_operation) {
+async function componyaccountsHistory(data, sent, historyStatus) {
     try {
 
-        console.log("passed creation object");
-        let companyaccountsHistory = {
-            uuid: generatePrefixedUUID('CAH'),
-            operation: notebookoperation.data._id,
-            money: data.money,
-            type_operation: type_operation,
+        let dataHistory = {
+            uuid: generatePrefixedUUID("CAH"),
+            creation_status: historyStatus,
+            mouvment: sent.mouvment,
+            operation: data._id,
+            type_operation: data.type_operation,
             amount: data.amount,
             done_by: data.done_by,
             done_at: data.done_at,
-            mouvment: data.type_operation,
-            observation: data.observation,
-            creation_status: creation_status,
-            sold_operation: notebookexist.data.sold_operation,
-            validated_by: notebookoperation.data.created_by
-        }
-        console.log("accountHistoryIntiate");
-        let companyaccountshistory = await companyaccountsHistorys.create(companyaccountsHistory);
+            validation: sent.validation,
+            collecter: sent.collecter,
+            money: data.money,
+            mouvment: sent.mouvment,
+            validated_by: sent.validated_by,
+            observation: data.observation
+        };
+        console.log("accountHistoryIntiate ", dataHistory);
+        let history = await companyaccountsHistorys.create(dataHistory);
         console.log("accountHistoryValidate");
-        if (companyaccountsHistory) {
+        if (history) {
             console.log("passed");
             return {
                 message: true,
                 error: null,
-                data: companyaccountshistory
+                data: history
             }
         }
         else {
@@ -189,7 +231,7 @@ async function componyaccountsHistory(data, notebookoperation, notebookexist, ty
         }
     }
 }
-module.exports = { notbookexist, accountexist, historyMemberPassed, companyaccountFindAndUpdateOne, notbookUpdated, componyaccountsHistory };
+module.exports = { notbookexist, accountexist, notbookUpdated, historyMemberPassed, companyaccountFindAndUpdateOne, accounnotbookUpdated, componyaccountsHistory };
 
 // try {
 //     if (!data.uuid) {

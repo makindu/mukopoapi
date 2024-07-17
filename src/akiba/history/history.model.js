@@ -42,7 +42,7 @@ const notebookOperationSchema = new schema({
     },
     type_operation: {
         type: String,
-        required: true
+        // required: true
     },
     done_at: {
         type: Date,
