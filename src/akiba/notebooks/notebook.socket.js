@@ -35,7 +35,7 @@ const NoteBookWebSocket = async (io) => {
                     data: result.data
                 })
             }
-            else if (result.message == 'error') {
+            else {
                 console.log('message error');
                 return io.emit("create_notebook", {
                     message: "error occured",

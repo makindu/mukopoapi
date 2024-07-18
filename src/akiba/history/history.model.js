@@ -44,6 +44,10 @@ const notebookOperationSchema = new schema({
         type: String,
         // required: true
     },
+    creation_status: {
+        type: String,
+        required: true
+    },
     done_at: {
         type: Date,
         required: true

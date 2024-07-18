@@ -56,12 +56,36 @@ async function accountexist(data) {
     }
 
 }
+async function componyaccountsHistoryFindAndUpdate(data) {
+    try {
+
+        let history = await companyaccountsHistorys.findByIdAndUpdate(data._id, data);
+
+        return {
+            message: true,
+            error: null,
+            data: history
+        }
+
+    } catch (error) {
+        console.log(error);
+        return {
+            message: false,
+            error: error,
+            data: null
+        }
+    }
+}
 async function accounnotbookUpdated(data) {
     try {
         let accountMember = await account.findOne({ _id: data.account });
-        let newSold = data.amount;
-
-        newSold += accountMember.sold;
+        let newSold = 0;
+        if (data.mouvment == 'withdraw') {
+            newSold = accountMember.sold - data.notebook.sold;
+        } else {
+            newSold = data.amount;
+            newSold += accountMember.sold;
+        }
         let Memberaccount = {
             sold: newSold,
         };
@@ -95,17 +119,31 @@ async function notbookUpdated(data) {
     try {
         let NoteBookMember = await notebook.findOne({ _id: data.notebook._id });
         let status = 'validated';
+        let MemberNotbook = {};
         if (NoteBookMember.operation_done == 26) {
 
             status = "unavailable";
         };
-        let MemberNotbook = {
-            operation_done: NoteBookMember.operation_done + 1,
-            sold_operation: NoteBookMember.sold_operation - 1,
-            note_status: status,
-            sold: (NoteBookMember.amount * (NoteBookMember.operation_done + 1))
-        };
-        MemberNotbook.sold = MemberNotbook.sold - NoteBookMember.amount;
+        if (data.mouvment == 'withdraw') {
+            status = "withdrawn";
+            NoteBookMember.sold_operation = 0;
+            MemberNotbook = {
+                sold_operation: 0,
+                note_status: status,
+                sold: 0
+            };
+        }
+        if (data.mouvment == 'entry') {
+            MemberNotbook = {
+                operation_done: NoteBookMember.operation_done + 1,
+                sold_operation: NoteBookMember.sold_operation - 1,
+                note_status: status,
+                sold: (NoteBookMember.amount * (NoteBookMember.operation_done + 1))
+            };
+            MemberNotbook.sold = MemberNotbook.sold - NoteBookMember.amount;
+        }
+
+
         let resultat = await notebook.findByIdAndUpdate(data.notebook._id, MemberNotbook);
         console.log("here updating status");
         if (resultat) {
@@ -241,7 +279,7 @@ async function componyaccountsHistory(data, sent, historyStatus) {
         }
     }
 }
-module.exports = { notbookexist, accountexist, notbookUpdated, historyMemberPassed, companyaccountFindAndUpdateOne, accounnotbookUpdated, componyaccountsHistory };
+module.exports = { notbookexist, accountexist, notbookUpdated, historyMemberPassed, companyaccountFindAndUpdateOne, accounnotbookUpdated, componyaccountsHistory, componyaccountsHistoryFindAndUpdate };
 
 // try {
 //     if (!data.uuid) {
