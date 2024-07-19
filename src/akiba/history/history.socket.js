@@ -391,10 +391,14 @@ const NotebookOperationSocket = async (io) => {
                 data.validation = true;
                 console.log("creation status in change state");
                 try {
+                    if(data.type_operation == "first deposit" ){
+                        
+                    }
                     console.log("creation status in change find hist", data);
                     let status = {
                         note_status: creation_status
                     }
+                    /// methode pour trouver le vrai id du carnet à  ajouter ici
                     let resultat = await notebook.findOne({ money: data.money });
                     console.log("book to validate", resultat);
                     if (resultat) {

@@ -1,4 +1,5 @@
 const { notebookoperation, notebook, componyaccounts, companyaccountsHistorys, account } = require("../../db.provider");
+const companyaccountModel = require("../akiba/companyaccounts/companyaccount.model");
 const { generatePrefixedUUID, generateRandomString } = require("../helper/uuid");
 
 async function notbookexist(data) {
@@ -144,9 +145,10 @@ async function notbookUpdated(data) {
                 operation_done: NoteBookMember.operation_done + 1,
                 sold_operation: NoteBookMember.sold_operation - 1,
                 note_status: status,
-                sold: data.member.type == 'manager' ? (NoteBookMember.amount * (NoteBookMember.operation_done + 1)) : NoteBookMember.amount * (NoteBookMember.operation_done),
+                sold: data.member.type == 'manager' ? (NoteBookMember.amount * (NoteBookMember.operation_done + 1)) :NoteBookMember.note_status == "pending" ? 0 :   (NoteBookMember.amount * NoteBookMember.operation_done ) ,
             };
-            MemberNotbook.sold = MemberNotbook.sold - NoteBookMember.amount;
+            MemberNotbook.sold = MemberNotbook.sold;
+            // MemberNotbook.sold = MemberNotbook.sold - NoteBookMember.amount;
         }
 
 
@@ -285,7 +287,123 @@ async function componyaccountsHistory(data, sent, historyStatus) {
         }
     }
 }
-module.exports = { notbookexist, accountexist, notbookUpdated, historyMemberPassed, companyaccountFindAndUpdateOne, accounnotbookUpdated, componyaccountsHistory, componyaccountsHistoryFindAndUpdate };
+
+async function validationforFirstDepositOperation(data) {
+    try {
+        let companyaccount = await companyaccountFindAndUpdateOne(data);
+        if(companyaccount.message == true ){
+            let memberStory = await componyaccountsHistoryFindAndUpdate(data);
+            if(memberStory){
+                
+            }
+        }
+        
+    } catch (error) {
+        
+    }
+    
+}
+//added by fabrice
+async function updateuserstory(data) {
+    try {
+        let result = await notebookoperation.findByIdAndUpdate(data._id,data);
+        if (result) {
+            console.log("updating notebookoperation for member");
+            return {
+                message: true,
+                error: null,
+                data: result
+            }
+        }
+        else {
+            return {
+                message: false,
+                error: "data not found",
+                data: null
+            }
+        }
+
+    } catch (error) {
+        return {
+            message: false,
+            error: error,
+            data: null
+        }
+
+    }
+}
+
+async function updateaccountcompany(data) {
+    try {
+        let result = await companyaccountModel.findByIdAndUpdate(data._id,data);
+        if (result) {
+            console.log("updating updateaccountcompany");
+            return {
+                message: true,
+                error: null,
+                data: result
+            }
+        }
+        else {
+            return {
+                message: false,
+                error: "data not found",
+                data: null
+            }
+        }
+
+    } catch (error) {
+        return {
+            message: false,
+            error: error,
+            data: null
+        }
+
+    }
+}
+
+async function updatecompanystory(data) {
+    try {
+        let result = await companyaccountsHistorys.findByIdAndUpdate(data._id,data);
+        if (result) {
+            console.log("updating updatecompanystory");
+            return {
+                message: true,
+                error: null,
+                data: result
+            }
+        }
+        else {
+            return {
+                message: false,
+                error: "data not found",
+                data: null
+            }
+        }
+
+    } catch (error) {
+        return {
+            message: false,
+            error: error,
+            data: null
+        }
+
+    }
+}
+
+module.exports = {
+    updateuserstory,
+    updateaccountcompany,
+    updatecompanystory, 
+    notbookexist, 
+    accountexist, 
+    notbookUpdated, 
+    historyMemberPassed, 
+    companyaccountFindAndUpdateOne, 
+    accounnotbookUpdated, 
+    componyaccountsHistory, 
+    componyaccountsHistoryFindAndUpdate 
+};
 
 // try {
 //     if (!data.uuid) {
