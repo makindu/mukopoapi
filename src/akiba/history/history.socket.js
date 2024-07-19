@@ -25,7 +25,7 @@ const NotebookOperationSocket = async (io) => {
                     });
                 }
 
-                if (data.notebook.operation_done == 0 && data.member.type == 'manager' || data.member.type != 'manager') {
+                if (data.notebook.operation_done == 0 && data.member.type == 'manager') {
                     type_operation = "first deposit";
                     historyStatus = "validated";
                     data.creation_status = historyStatus;
@@ -40,6 +40,8 @@ const NotebookOperationSocket = async (io) => {
                                 error: null,
                                 data: membernoteBookUpdate.data
                             });
+                            data.type_operation = data.notebook.operation_done == 0 ? "first deposit" : type_operation;
+
                             let historyMember = await historyMemberPassed(data);
                             if (historyMember.message == true) {
                                 console.log("hisory member passed ", data.mouvment);
@@ -101,6 +103,8 @@ const NotebookOperationSocket = async (io) => {
                                 });
                                 data.amount = singleSold;
                                 data.uuid = generatePrefixedUUID('NH') + index;
+                                data.type_operation = data.notebook.operation_done == 0 ? "first deposit" : type_operation;
+
                                 let historyMember = await historyMemberPassed(data, index);
                                 if (historyMember.message == true) {
                                     total_deposit = total_deposit + singleSold;
@@ -120,6 +124,22 @@ const NotebookOperationSocket = async (io) => {
 
                         if (historyMembers.length > 0) {
                             historyMembers[0].amount = total_deposit;
+                            if (data.notebook.operation_done == 0) {
+                                historyMembers[0].type_operation = "first deposit";
+                                let historyCompanyaccountPassed = await componyaccountsHistory(historyMembers[0], data, historyStatus);
+                                console.log("history when notebook in pandig", historyCompanyaccountPassed);
+
+                                if (historyCompanyaccountPassed.message = false) {
+                                    io.emit("new_notebook_operation", {
+                                        status: 400,
+                                        message: "error occured",
+                                        error: null,
+                                        data: null
+                                    });
+                                    return;
+                                }
+                            }
+
                             io.emit("new_notebook_operation", {
                                 status: 200,
                                 message: "success",
@@ -137,49 +157,76 @@ const NotebookOperationSocket = async (io) => {
                 }
                 else if (parseInt(existingNoteBook.data.amount) == parseInt(data.amount)) {
                     data.creation_status = "pending";
-                    let memberAccountUpdate = await accounnotbookUpdated(data);
-                    if (memberAccountUpdate.message == true) {
-
-                        let notbookUpdate = await notbookUpdated(data);
-                        if (notbookUpdate.message == true) {
-                            io.emit("notebook_updated", {
-                                status: 200,
-                                message: "success",
-                                error: null,
-                                data: notbookUpdate.data
-                            });
-                            data.type_operation = type_operation;
-                            let historyMember = await historyMemberPassed(data);
-                            console.log("history member ", historyMember);
-                            if (historyMember.message == true) {
-                                console.log("inside history member when true");
-                                io.emit("new_notebook_operation", {
-                                    status: 200,
-                                    message: "success",
-                                    error: null,
-                                    data: historyMember.data
-                                });
-                            }
-                            else {
-                                io.emit("new_notebook_operation", {
-                                    status: 400,
-                                    message: "error occured",
-                                    error: null,
-                                    data: null
-                                });
-
-                            }
-                        }
-                        else {
+                    if (data.member.type == 'manager') {
+                        let memberAccountUpdate = await accounnotbookUpdated(data);
+                        if (memberAccountUpdate.message == false) {
                             io.emit("notebook_updated", {
                                 status: 400,
                                 message: "error occured",
                                 error: null,
-                                data: null,
+                                data: null
+                            });
+                            return;
+                        }
+                    }
+
+
+                    let notbookUpdate = await notbookUpdated(data);
+                    if (notbookUpdate.message == true) {
+                        io.emit("notebook_updated", {
+                            status: 200,
+                            message: "success",
+                            error: null,
+                            data: notbookUpdate.data
+                        });
+                        data.type_operation = data.notebook.operation_done == 0 ? "first deposit" : type_operation;
+                        let historyMember = await historyMemberPassed(data);
+                        console.log("history member ", historyMember);
+                        if (historyMember.message == true) {
+                            console.log("inside history member when true");
+                            if (data.notebook.operation_done == 0) {
+                                type_operation = "first deposit"
+                                historyMember.data.type_operation = type_operation;
+
+                                let historyCompanyaccountPassed = await componyaccountsHistory(historyMember.data, data, historyStatus);
+                                console.log("history when notebook in pandig", historyCompanyaccountPassed);
+                                if (historyCompanyaccountPassed.message = false) {
+                                    io.emit("new_notebook_operation", {
+                                        status: 400,
+                                        message: "error occured",
+                                        error: null,
+                                        data: null
+                                    });
+                                    return;
+                                }
+                            }
+                            io.emit("new_notebook_operation", {
+                                status: 200,
+                                message: "success",
+                                error: null,
+                                data: historyMember.data
                             });
                         }
+                        else {
+                            io.emit("new_notebook_operation", {
+                                status: 400,
+                                message: "error occured",
+                                error: null,
+                                data: null
+                            });
 
+                        }
                     }
+                    else {
+                        io.emit("notebook_updated", {
+                            status: 400,
+                            message: "error occured",
+                            error: null,
+                            data: null,
+                        });
+                    }
+
+                    // }
                 }
 
 
@@ -224,6 +271,8 @@ const NotebookOperationSocket = async (io) => {
                         if (!data.uuid) {
                             data.uuid = generatePrefixedUUID('WD');
                         }
+                        data.type_operation = data.notebook.operation_done == 0 ? "first deposit" : type_operation;
+
                         let historyMember = await historyMemberPassed(data);
                         if (historyMember.message == true) {
                             let existingaccount = await accountexist(data);
@@ -343,26 +392,32 @@ const NotebookOperationSocket = async (io) => {
                 console.log("creation status in change state");
                 try {
                     console.log("creation status in change find hist", data);
-                    let companyaccountHistoryUpda = await componyaccountsHistoryFindAndUpdate(data);
-                    console.log("creation status in change find histUpdate ", data);
-                    if (companyaccountHistoryUpda.message == true) {
-                        let status = {
-                            note_status: creation_status
-                        }
-                        let resultat = await notebook.findByIdAndUpdate(data.operation, status);
-                        if (resultat) {
-                            let companyaccount = {
-                                sold: data.amount,
-                            };
-                            let accountcompany = await componyaccounts.findByIdAndUpdate(money, data.money);
+                    let status = {
+                        note_status: creation_status
+                    }
+                    let resultat = await notebook.findOne({ money: data.money });
+                    console.log("book to validate", resultat);
+                    if (resultat) {
+                        let resultatupdate = await notebook.findByIdAndUpdate(resultat._id, status);
+                        let companyaccount = {
+                            sold: data.amount,
+                        };
+                        let companyaccountHistoryUpda = await componyaccountsHistoryFindAndUpdate(data);
+                        console.log("creation status in change find histUpdate ", data);
+                        if (companyaccountHistoryUpda.message == true) {
+
+                            let accountcompany = await componyaccounts.findOne({ money: data.money });
                             if (accountcompany) {
-                                console.log("creation status in change find histUpdateretuning", companyaccountHistoryUpda.data);
-                                io.emit("validate_action", {
-                                    status: 200,
-                                    message: "success",
-                                    error: null,
-                                    data: await companyaccountsHistorys.findById(data._id)
-                                });
+                                let accountcompanyUpdate = await componyaccounts.findOneAndUpdate(accountcompany._id, companyaccount);
+                                if (accountcompanyUpdate) {
+                                    console.log("creation status in change find histUpdateretuning", companyaccountHistoryUpda.data);
+                                    io.emit("validate_action", {
+                                        status: 200,
+                                        message: "success",
+                                        error: null,
+                                        data: await companyaccountsHistorys.findById(data._id)
+                                    });
+                                }
                             }
                         }
                         else {
@@ -396,11 +451,6 @@ const NotebookOperationSocket = async (io) => {
                 // companyaccountFindAndUpdateOne
             }
         }
-
-
-
-
-
     });
 };
 

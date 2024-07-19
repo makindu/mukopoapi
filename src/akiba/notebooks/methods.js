@@ -25,10 +25,10 @@ async function creatingNotebook(data) {
                 }
                 creation_status = 'validated';
                 validation = true;
-                // let companyaccount = {
-                //     sold: newSold,
-                // };
-                // await componyaccounts.findByIdAndUpdate(existingAccount._id, companyaccount);
+                let companyaccount = {
+                    sold: newSold,
+                };
+                await componyaccounts.findByIdAndUpdate(existingAccount._id, companyaccount);
             }
 
             let companyaccountsHistory = {

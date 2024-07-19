@@ -85,6 +85,9 @@ async function accounnotbookUpdated(data) {
         } else {
             newSold = data.amount;
             newSold += accountMember.sold;
+            if (data.notebook.operation_done == 0) {
+                newSold -= data.amount;
+            }
         }
         let Memberaccount = {
             sold: newSold,
@@ -118,8 +121,11 @@ async function accounnotbookUpdated(data) {
 async function notbookUpdated(data) {
     try {
         let NoteBookMember = await notebook.findOne({ _id: data.notebook._id });
-        let status = 'validated';
+        let status = 'pending';
         let MemberNotbook = {};
+        if (data.member.type == 'manager') {
+            status = 'validated';
+        }
         if (NoteBookMember.operation_done == 26) {
 
             status = "unavailable";
@@ -138,7 +144,7 @@ async function notbookUpdated(data) {
                 operation_done: NoteBookMember.operation_done + 1,
                 sold_operation: NoteBookMember.sold_operation - 1,
                 note_status: status,
-                sold: (NoteBookMember.amount * (NoteBookMember.operation_done + 1))
+                sold: data.member.type == 'manager' ? (NoteBookMember.amount * (NoteBookMember.operation_done + 1)) : NoteBookMember.amount * (NoteBookMember.operation_done),
             };
             MemberNotbook.sold = MemberNotbook.sold - NoteBookMember.amount;
         }
