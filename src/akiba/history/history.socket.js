@@ -1,5 +1,18 @@
 const { notebookoperation, companyaccountsHistorys, notebook, componyaccounts } = require('../../../db.provider');
-const { notbookexist, accountexist, notbookUpdated, historyMemberPassed, companyaccountFindAndUpdateOne, accounnotbookUpdated, componyaccountsHistory, componyaccountsHistoryFindAndUpdate } = require('../../helper/public_methods');
+const { 
+    updatenotebook,
+    updateuserstory,
+    updateaccountcompany,
+    updatecompanystory, 
+    notbookexist, 
+    accountexist, 
+    notbookUpdated, 
+    historyMemberPassed, 
+    companyaccountFindAndUpdateOne, 
+    accounnotbookUpdated, 
+    componyaccountsHistory, 
+    componyaccountsHistoryFindAndUpdate 
+ } = require('../../helper/public_methods');
 const { generatePrefixedUUID, generateRandomString } = require("../../helper/uuid");
 
 const NotebookOperationSocket = async (io) => {
@@ -382,77 +395,106 @@ const NotebookOperationSocket = async (io) => {
             })
         }
 
-        if (data.nature_operation == "companyhistory") {
-            if (data.creation_status ==
-                "pending") {
-                console.log("creation status in pannding ", data);
-                let creation_status = "validated";
-                data.creation_status = creation_status;
-                data.validation = true;
-                console.log("creation status in change state");
-                try {
-                    if(data.type_operation == "first deposit" ){
+        if (data.nature_operation == "companyhistory") 
+            {
+                if (data.creation_status =="pending") 
+                    {
+                        console.log("creation status in pannding ", data);
+                        let creation_status = "validated";
+                        console.log("creation status in change state");
                         
-                    }
-                    console.log("creation status in change find hist", data);
-                    let status = {
-                        note_status: creation_status
-                    }
-                    /// methode pour trouver le vrai id du carnet à  ajouter ici
-                    let resultat = await notebook.findOne({ money: data.money });
-                    console.log("book to validate", resultat);
-                    if (resultat) {
-                        let resultatupdate = await notebook.findByIdAndUpdate(resultat._id, status);
-                        let companyaccount = {
-                            sold: data.amount,
-                        };
-                        let companyaccountHistoryUpda = await componyaccountsHistoryFindAndUpdate(data);
-                        console.log("creation status in change find histUpdate ", data);
-                        if (companyaccountHistoryUpda.message == true) {
-
-                            let accountcompany = await componyaccounts.findOne({ money: data.money });
-                            if (accountcompany) {
-                                let accountcompanyUpdate = await componyaccounts.findOneAndUpdate(accountcompany._id, companyaccount);
-                                if (accountcompanyUpdate) {
-                                    console.log("creation status in change find histUpdateretuning", companyaccountHistoryUpda.data);
-                                    io.emit("validate_action", {
-                                        status: 200,
-                                        message: "success",
-                                        error: null,
-                                        data: await companyaccountsHistorys.findById(data._id)
-                                    });
+                        
+                        
+                        try {
+                            if(data.type_operation == "first deposit" ){
+                                //changing companyaccount history status
+                                data.creation_status="validated";
+                                data.validation = true;
+                                
+                                let storyupdated = await componyaccountsHistoryFindAndUpdate(data);
+                                if(storyupdated.message){
+                                    //changing memberaccount history status
+                                    let storyfinded = await notebookoperation.findById({_id:data.operation});
+                                    if(storyfinded){
+                                        storyfinded.creation_status="validated";
+                                        let operationupdated = await updateuserstory(storyfinded);
+                                        if (operationupdated.message) {
+                                            //updating companyaccount sold
+                                            let companyaccountupdated = await companyaccountFindAndUpdateOne(data);
+                                            if (companyaccountupdated.message) {
+                                                io.emit("validate_action", {
+                                                    status: 200,
+                                                    message: "success",
+                                                    error: null,
+                                                    data: await companyaccountsHistorys.findById({_id: storyupdated.data._id })
+                                                });
+                                            }else{
+                                                io.emit("validate_action", {
+                                                    status: 400,
+                                                    message: "error occured",
+                                                    error: "",
+                                                    data:null
+                                                });
+                                            }
+                                           
+                                        }
+                                    }
+                                    
+                                }else{
+                                    //aborting all transactions
                                 }
+                        
+                        }
+
+                        if(data.type_operation == "created_book"){
+                            //changing companyaccount history status
+                            data.creation_status="validated";
+                            data.validation = true;
+                            
+                            let storyupdated = await componyaccountsHistoryFindAndUpdate(data);
+                            if(storyupdated.message){
+                                //updating companyaccount sold
+                                let companyaccountupdated = await companyaccountFindAndUpdateOne(data);
+                                if (companyaccountupdated.message) {
+                                    //changing notebook status to "validated"
+                                    let notebookfinded = await notebook.findById(data.operation);
+                                    if(notebookfinded){
+                                        notebookfinded.note_status="validaded";
+                                        let noteupdated = await updatenotebook(notebookfinded);
+                                        if(noteupdated.message){
+                                             //returning the history
+                                             io.emit("validate_action", {
+                                                status: 200,
+                                                message: "success",
+                                                error: null,
+                                                data: await companyaccountsHistorys.findById({_id: storyupdated.data._id })
+                                            });
+                                        }else{
+                                            io.emit("validate_action", {
+                                                status: 400,
+                                                message: "error occured",
+                                                error: "",
+                                                data: null
+                                            });
+                                        }
+                                    }
+                                }
+
                             }
                         }
-                        else {
-                            io.emit("validate_action", {
-                                status: 400,
-                                message: "error occured",
-                                error: null,
-                                data: null
-                            });
-                        }
 
-                    }
-                    else {
-                        console.log("creation status in change find histUpdateretuningerror");
+                        
+                      } catch (error) {
+                        console.log("creation status in change find histUpdateretuningerror exception", error);
                         return io.emit("validate_action", {
-                            status: 400,
+                            status: 500,
                             message: "error occured",
-                            error: null,
+                            error: error,
                             data: null
-                        })
+                        });
                     }
-                } catch (error) {
-                    console.log("creation status in change find histUpdateretuningerror exception", error);
-                    return io.emit("validate_action", {
-                        status: 500,
-                        message: "error occured",
-                        error: error,
-                        data: null
-                    })
-                }
-                // companyaccountFindAndUpdateOne
+                
+                    // companyaccountFindAndUpdateOne
             }
         }
     });

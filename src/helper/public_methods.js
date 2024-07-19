@@ -1,5 +1,6 @@
 const { notebookoperation, notebook, componyaccounts, companyaccountsHistorys, account } = require("../../db.provider");
 const companyaccountModel = require("../akiba/companyaccounts/companyaccount.model");
+const notebookModel = require("../akiba/notebooks/notebook.model");
 const { generatePrefixedUUID, generateRandomString } = require("../helper/uuid");
 
 async function notbookexist(data) {
@@ -288,21 +289,6 @@ async function componyaccountsHistory(data, sent, historyStatus) {
     }
 }
 
-async function validationforFirstDepositOperation(data) {
-    try {
-        let companyaccount = await companyaccountFindAndUpdateOne(data);
-        if(companyaccount.message == true ){
-            let memberStory = await componyaccountsHistoryFindAndUpdate(data);
-            if(memberStory){
-                
-            }
-        }
-        
-    } catch (error) {
-        
-    }
-    
-}
 //added by fabrice
 async function updateuserstory(data) {
     try {
@@ -391,7 +377,37 @@ async function updatecompanystory(data) {
     }
 }
 
+async function updatenotebook(data) {
+    try {
+        let result = await notebookModel.findByIdAndUpdate(data._id,data);
+        if (result) {
+            console.log("updating notebook");
+            return {
+                message: true,
+                error: null,
+                data: result
+            }
+        }
+        else {
+            return {
+                message: false,
+                error: "data not found",
+                data: null
+            }
+        }
+
+    } catch (error) {
+        return {
+            message: false,
+            error: error,
+            data: null
+        }
+
+    }
+}
+
 module.exports = {
+    updatenotebook,
     updateuserstory,
     updateaccountcompany,
     updatecompanystory, 
