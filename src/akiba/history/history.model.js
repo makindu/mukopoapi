@@ -18,7 +18,8 @@ const notebookOperationSchema = new schema({
         required: true
     },
     collecter: {
-        type: String,
+        type: Map,
+        required:false
     },
     account: {
         type: String,
